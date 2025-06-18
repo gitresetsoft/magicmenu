@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { FloatingButtons } from "./FloatingButtons";
 import { RecipeContent } from "./RecipeContent";
 import { useDifficultyTransform } from "@/hooks/useDifficultyTransform";
+import { shareRecipe } from "@/utils/shareUtils";
 
 interface Recipe {
   id: string;
@@ -39,6 +39,13 @@ export const RecipeCard = ({ recipe, isTransitioning }: RecipeCardProps) => {
     }, 200);
   };
 
+  const handleShare = () => {
+    shareRecipe({
+      id: recipe.id,
+      name: recipe.name
+    });
+  };
+
   return (
     <div className={`recipe-card ${isTransitioning ? 'card-transitioning' : ''}`}>
       {/* Background Image */}
@@ -63,6 +70,7 @@ export const RecipeCard = ({ recipe, isTransitioning }: RecipeCardProps) => {
         onLoveToggle={() => setIsLoved(!isLoved)}
         currentDifficulty={difficulty}
         onDifficultyChange={handleDifficultyChange}
+        onShare={handleShare}
       />
     </div>
   );
