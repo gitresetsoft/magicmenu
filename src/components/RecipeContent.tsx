@@ -7,6 +7,7 @@ interface RecipeContentProps {
     cookTime: string;
     category: string;
     area: string;
+    source?: 'indonesian' | 'malaysian';
   };
   isChanging: boolean;
   difficulty: 'malas' | 'biasa' | 'power';
@@ -20,6 +21,7 @@ const difficultyLabels = {
 
 export const RecipeContent = ({ recipe, isChanging, difficulty }: RecipeContentProps) => {
   const difficultyInfo = difficultyLabels[difficulty];
+  const isIndonesian = recipe.source === 'indonesian';
 
   return (
     <div className="recipe-content-container">
@@ -32,7 +34,11 @@ export const RecipeContent = ({ recipe, isChanging, difficulty }: RecipeContentP
               <span className="difficulty-emoji">{difficultyInfo.emoji}</span>
               <span className="difficulty-label">{difficultyInfo.label}</span>
             </span>
-            <span className="recipe-origin">{recipe.area} • {recipe.category}</span>
+            <span className="recipe-origin">
+              {recipe.area} • {recipe.category}
+              {isIndonesian && <span className="ml-1">🇮🇩</span>}
+              {recipe.source === 'malaysian' && <span className="ml-1">🇲🇾</span>}
+            </span>
           </div>
         </div>
 
@@ -43,7 +49,7 @@ export const RecipeContent = ({ recipe, isChanging, difficulty }: RecipeContentP
           </div>
 
           <div className="recipe-section">
-            <h3 className="section-title">🛒 Ingredients</h3>
+            <h3 className="section-title">🛒 Bahan-bahan</h3>
             <div className="ingredients-list">
               {recipe.ingredients.map((ingredient, index) => (
                 <div key={index} className="ingredient-item">
@@ -54,7 +60,7 @@ export const RecipeContent = ({ recipe, isChanging, difficulty }: RecipeContentP
           </div>
 
           <div className="recipe-section">
-            <h3 className="section-title">👨‍🍳 Instructions</h3>
+            <h3 className="section-title">👨‍🍳 Cara Masak</h3>
             <div className="instructions-text">
               {recipe.instructions}
             </div>

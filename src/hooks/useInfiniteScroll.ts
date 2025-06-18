@@ -15,7 +15,7 @@ export const useInfiniteScroll = ({
   const touchStartY = useRef<number>(0);
   const scrollThreshold = 50;
 
-  const handleScroll = useCallback((e: WheelEvent) => {
+  const handleScroll = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
     e.preventDefault();
     
     const deltaY = e.deltaY;

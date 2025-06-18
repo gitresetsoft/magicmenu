@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { theMealDBApi } from "@/services/theMealDBApi";
+import { recipeApi } from "@/services/recipeApi";
 import { transformRecipe } from "@/utils/recipeTransformer";
 
 interface Recipe {
@@ -13,32 +13,53 @@ interface Recipe {
   originalIngredients: string[];
   originalInstructions: string;
   videoUrl?: string;
+  source: 'indonesian' | 'malaysian';
 }
 
 export const useRecipeBuffer = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [fetchCount, setFetchCount] = useState(0);
 
-  // Initial fetch of recipes
+  // Initial fetch with 70/30 ratio (2 Indonesian + 2 Malaysian)
   const { data: initialRecipes, isLoading } = useQuery({
     queryKey: ['recipes', 'initial'],
     queryFn: async () => {
-      console.log('Fetching initial recipes...');
-      const recipePromises = Array(4).fill(null).map(() => theMealDBApi.getRandomRecipe());
-      const results = await Promise.all(recipePromises);
-      return results.map(transformRecipe);
+      console.log('Fetching initial recipes with 70/30 ratio...');
+      
+      const [indonesianRecipes, malaysianRecipes] = await Promise.all([
+        recipeApi.getIndonesianRecipes(2),
+        recipeApi.getMalaysianRecipes(2)
+      ]);
+
+      const transformedRecipes = [
+        ...indonesianRecipes.map(recipe => transformRecipe(recipe, 'indonesian')),
+        ...malaysianRecipes.map(recipe => transformRecipe(recipe, 'malaysian'))
+      ];
+
+      // Shuffle to mix Indonesian and Malaysian recipes
+      return transformedRecipes.sort(() => 0.5 - Math.random());
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Additional recipes fetching
+  // Additional recipes fetching maintaining 70/30 ratio
   const { refetch: fetchMoreRecipes, isFetching } = useQuery({
     queryKey: ['recipes', 'additional', fetchCount],
     queryFn: async () => {
-      console.log('Fetching additional recipes...');
-      const recipePromises = Array(3).fill(null).map(() => theMealDBApi.getRandomRecipe());
-      const results = await Promise.all(recipePromises);
-      return results.map(transformRecipe);
+      console.log('Fetching additional recipes maintaining 70/30 ratio...');
+      
+      // Fetch 2 Indonesian + 1 Malaysian to maintain ratio
+      const [indonesianRecipes, malaysianRecipes] = await Promise.all([
+        recipeApi.getIndonesianRecipes(2),
+        recipeApi.getMalaysianRecipes(1)
+      ]);
+
+      const transformedRecipes = [
+        ...indonesianRecipes.map(recipe => transformRecipe(recipe, 'indonesian')),
+        ...malaysianRecipes.map(recipe => transformRecipe(recipe, 'malaysian'))
+      ];
+
+      return transformedRecipes.sort(() => 0.5 - Math.random());
     },
     enabled: false,
   });
